@@ -1,0 +1,26 @@
+proto: amqp-rabbit
+users:
+  - username: guest
+    password: 084e0343a0486ff05530df6c705c8bb4 # guest md5
+tcp:
+  ip: 0.0.0.0
+  port: 5672
+  nodelay: false
+  readBufSize: 196608
+  writeBufSize: 196608
+admin:
+  ip: 0.0.0.0
+  port: 15672
+queue:
+  shardSize: 8192
+  maxMessagesInRam: 131072
+db:
+  defaultPath: db
+  engine: badger
+vhost:
+  defaultPath: /
+security:
+  passwordCheck: md5
+connection:
+  channelsMax: 4096
+  frameMaxSize: 65536
