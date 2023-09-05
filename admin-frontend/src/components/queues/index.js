@@ -73,7 +73,8 @@ class Queues extends React.Component {
                                 <TableCell>{row.vhost}</TableCell>
                                 <TableCell>{row.name}</TableCell>
                                 <TableCell padding={'checkbox'}><Checkbox disabled checked={row.durable}/></TableCell>
-                                <TableCell padding={'checkbox'}><Checkbox disabled checked={row.auto_delete}/></TableCell>
+                                <TableCell padding={'checkbox'}><Checkbox disabled
+                                                                          checked={row.auto_delete}/></TableCell>
                                 <TableCell padding={'checkbox'}><Checkbox disabled checked={row.exclusive}/></TableCell>
                                 <TableCell>{row.counters.ready ? row.counters.ready.value : 0}</TableCell>
                                 <TableCell>{row.counters.unacked ? row.counters.unacked.value : 0}</TableCell>

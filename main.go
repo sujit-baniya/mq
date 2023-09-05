@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
 	"github.com/valinurovam/garagemq/admin"
 	"github.com/valinurovam/garagemq/config"
 	"github.com/valinurovam/garagemq/metrics"

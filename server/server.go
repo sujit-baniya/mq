@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/valinurovam/garagemq/amqp"
 	"github.com/valinurovam/garagemq/auth"
 	"github.com/valinurovam/garagemq/config"
@@ -331,8 +332,6 @@ func (srv *Server) getStorageInstance(name string, isPersistent bool) interfaces
 	switch srv.config.Db.Engine {
 	case config.DbEngineTypeBadger:
 		return storage.NewBadger(stPath)
-	case config.DbEngineTypeBuntDb:
-		return storage.NewBuntDB(stPath)
 	default:
 		srv.stopWithError(nil, fmt.Sprintf("Unknown db engine '%s'", srv.config.Db.Engine))
 	}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger"
+
 	"github.com/valinurovam/garagemq/interfaces"
 )
 

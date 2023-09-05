@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -22,7 +22,7 @@ var (
 	queue             = flag.String("queue", "test-queue", "Ephemeral AMQP queue name")
 	bindingKey        = flag.String("key", "test-key", "AMQP binding key")
 	consumerTag       = flag.String("consumer-tag", "simple-consumer", "AMQP consumer tag (should not be blank)")
-	lifetime          = flag.Duration("lifetime", 5*time.Second, "lifetime of process before shutdown (0s=infinite)")
+	lifetime          = flag.Duration("lifetime", 5*time.Minute, "lifetime of process before shutdown (0s=infinite)")
 	verbose           = flag.Bool("verbose", true, "enable verbose output of message data")
 	autoAck           = flag.Bool("auto_ack", false, "enable message auto-ack")
 	ErrLog            = log.New(os.Stderr, "[ERROR] ", log.LstdFlags|log.Lmsgprefix)
@@ -39,9 +39,9 @@ func main() {
 	if err != nil {
 		ErrLog.Fatalf("%s", err)
 	}
-	
+
 	SetupCloseHandler(c)
-	
+
 	if *lifetime > 0 {
 		Log.Printf("running for %s", *lifetime)
 		time.Sleep(*lifetime)
@@ -49,9 +49,9 @@ func main() {
 		Log.Printf("running until Consumer is done")
 		<-c.done
 	}
-	
+
 	Log.Printf("shutting down")
-	
+
 	if err := c.Shutdown(); err != nil {
 		ErrLog.Fatalf("error during shutdown: %s", err)
 	}
@@ -84,9 +84,9 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 		tag:     ctag,
 		done:    make(chan error),
 	}
-	
+
 	var err error
-	
+
 	config := amqp.Config{Properties: amqp.NewConnectionProperties()}
 	config.Properties.SetClientConnectionName("sample-consumer")
 	Log.Printf("dialing %q", amqpURI)
@@ -94,17 +94,17 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	if err != nil {
 		return nil, fmt.Errorf("Dial: %s", err)
 	}
-	
+
 	go func() {
 		Log.Printf("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
 	}()
-	
+
 	Log.Printf("got Connection, getting Channel")
 	c.channel, err = c.conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("Channel: %s", err)
 	}
-	
+
 	Log.Printf("got Channel, declaring Exchange (%q)", exchange)
 	if err = c.channel.ExchangeDeclare(
 		exchange,     // name of the exchange
@@ -117,7 +117,7 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	); err != nil {
 		return nil, fmt.Errorf("Exchange Declare: %s", err)
 	}
-	
+
 	Log.Printf("declared Exchange, declaring Queue %q", queueName)
 	queue, err := c.channel.QueueDeclare(
 		queueName, // name of the queue
@@ -130,10 +130,10 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	if err != nil {
 		return nil, fmt.Errorf("Queue Declare: %s", err)
 	}
-	
+
 	Log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
 		queue.Name, queue.Messages, queue.Consumers, key)
-	
+
 	if err = c.channel.QueueBind(
 		queue.Name, // name of the queue
 		key,        // bindingKey
@@ -143,7 +143,7 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	); err != nil {
 		return nil, fmt.Errorf("Queue Bind: %s", err)
 	}
-	
+
 	Log.Printf("Queue bound to Exchange, starting Consume (consumer tag %q)", c.tag)
 	deliveries, err := c.channel.Consume(
 		queue.Name, // name
@@ -157,9 +157,9 @@ func NewConsumer(amqpURI, exchange, exchangeType, queueName, key, ctag string) (
 	if err != nil {
 		return nil, fmt.Errorf("Queue Consume: %s", err)
 	}
-	
+
 	go handle(deliveries, c.done)
-	
+
 	return c, nil
 }
 
@@ -168,13 +168,13 @@ func (c *Consumer) Shutdown() error {
 	if err := c.channel.Cancel(c.tag, true); err != nil {
 		return fmt.Errorf("Consumer cancel failed: %s", err)
 	}
-	
+
 	if err := c.conn.Close(); err != nil {
 		return fmt.Errorf("AMQP connection close error: %s", err)
 	}
-	
+
 	defer Log.Printf("AMQP shutdown OK")
-	
+
 	// wait for handle() to exit
 	return <-c.done
 }
@@ -184,9 +184,9 @@ func handle(deliveries <-chan amqp.Delivery, done chan error) {
 		Log.Printf("handle: deliveries channel closed")
 		done <- nil
 	}
-	
+
 	defer cleanup()
-	
+
 	for d := range deliveries {
 		deliveryCount++
 		if *verbose == true {
